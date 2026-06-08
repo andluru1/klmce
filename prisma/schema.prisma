@@ -1,0 +1,234 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Department {
+  id            String         @id @default(uuid())
+  name          String
+  code          String         @unique // e.g., "05" for CSE
+  users         User[]
+  subjects      Subject[]
+  classSections ClassSection[]
+}
+
+model User {
+  id              String   @id @default(uuid())
+  rollNumber      String   @unique // e.g., 209Y1A0501 (for admins, a custom username)
+  passwordHash    String
+  role            String   @default("STUDENT") // STUDENT, ADMIN, or FACULTY
+  name            String
+  phone           String?  // Contact number for faculty/staff
+  departmentId    String?
+  department      Department? @relation(fields: [departmentId], references: [id])
+  classSectionId  String?
+  classSection    ClassSection? @relation(fields: [classSectionId], references: [id])
+  currentSem      String?  // e.g., "III-I"
+  attendancePct   Float?   // E.g., 68.5 (Triggers condonation if < 75)
+  busRoute        String?  // e.g., "Route 4 - Proddatur"
+  busPassValid    Boolean  @default(true)
+  rfidTag         String?  @unique // For hardware attendance sync
+  otpSecret       String?  // For 2FA Role-based access
+  
+  fees            Fee[]
+  transactions    Transaction[]
+  announcements   Announcement[] // Announcements created by this user
+  schedules       Schedule[] // Classes taught by this user (if FACULTY)
+  leaves          LeaveRequest[]
+  notifications   Notification[]
+  results         StudentResult[]
+  attendance      AttendanceRecord[]
+  disciplinaryRecords DisciplinaryRecord[] @relation("StudentDiscipline")
+  reportedMisconducts DisciplinaryRecord[] @relation("FacultyReporter")
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  recipientId String
+  recipient   User     @relation(fields: [recipientId], references: [id])
+  title       String
+  message     String
+  type        String   @default("GENERAL") // e.g., ATTENDANCE, FEE, GENERAL
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model Fee {
+  id          String    @id @default(uuid())
+  feeType     String    // e.g., "JNTU Fee", "Tuition Fee"
+  amount      Float
+  isPaid      Boolean   @default(false)
+  dueDate     DateTime
+  paidDate    DateTime?
+  paymentMode String?   // e.g., "Cash", "UPI", "NEFT", "Cheque", "Demand Draft"
+  paymentRef  String?   // e.g., Transaction ID or Cheque Number
+  remarks     String?   // e.g., "Late fee included"
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Announcement {
+  id          String   @id @default(uuid())
+  title       String
+  content     String
+  category    String   @default("General") // "Academic", "Administrative", "Co-curricular", "Placement"
+  importance  String   @default("Medium") // "High", "Medium", "Low"
+  attachmentUrl String? // Path to uploaded PDF or image
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model LeaveRequest {
+  id          String   @id @default(cuid())
+  facultyId   String
+  faculty     User     @relation(fields: [facultyId], references: [id])
+  startDate   DateTime
+  endDate     DateTime
+  reason      String
+  status      String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SystemConfig {
+  key         String   @id
+  value       String
+  updatedAt   DateTime @updatedAt
+}
+
+model Subject {
+  id          String   @id @default(uuid())
+  code        String   @unique // e.g., CS301
+  name        String   // e.g., Data Structures
+  credits     Int
+  semester    String   @default("I-I") // e.g., "I-I", "III-I"
+  departmentId String
+  department  Department @relation(fields: [departmentId], references: [id])
+  schedules   Schedule[]
+  exams       Exam[]
+  attendance  AttendanceRecord[]
+}
+
+model Room {
+  id          String   @id @default(uuid())
+  number      String   @unique // e.g., 101, Lab-3
+  capacity    Int
+  type        String   // "Classroom" or "Lab"
+  schedules   Schedule[]
+  exams       Exam[]
+}
+
+model ClassSection {
+  id          String   @id @default(uuid())
+  name        String   // e.g., CSE-A-III
+  departmentId String
+  department  Department @relation(fields: [departmentId], references: [id])
+  semester    String   // e.g., III-I
+  schedules   Schedule[]
+  users       User[]
+}
+
+model Schedule {
+  id             String   @id @default(uuid())
+  dayOfWeek      String   // "Monday", "Tuesday", etc.
+  startTime      String   // e.g., "09:00"
+  endTime        String   // e.g., "10:00"
+  
+  subjectId      String
+  subject        Subject  @relation(fields: [subjectId], references: [id])
+  
+  facultyId      String
+  faculty        User     @relation(fields: [facultyId], references: [id])
+  
+  roomId         String
+  room           Room     @relation(fields: [roomId], references: [id])
+  
+  classSectionId String
+  classSection   ClassSection @relation(fields: [classSectionId], references: [id])
+  attendanceRecords AttendanceRecord[]
+}
+
+// ----------------------------------------------------------------------
+// NEW MODELS FOR EMS, FINANCE, ATTENDANCE
+// ----------------------------------------------------------------------
+
+model Exam {
+  id          String   @id @default(uuid())
+  subjectId   String
+  subject     Subject  @relation(fields: [subjectId], references: [id])
+  date        DateTime
+  startTime   String?
+  endTime     String?
+  roomId      String?
+  room        Room?    @relation(fields: [roomId], references: [id])
+  maxMarks    Int
+  examType    String   // "Mid-Term", "Final", "Practical"
+  results     StudentResult[]
+}
+
+model StudentResult {
+  id            String   @id @default(uuid())
+  studentId     String
+  student       User     @relation(fields: [studentId], references: [id])
+  examId        String
+  exam          Exam     @relation(fields: [examId], references: [id])
+  marksObtained Int
+  gradePoint    Float    // e.g., 9.5
+}
+
+model FeeCategory {
+  id          String   @id @default(uuid())
+  name        String   // "Tuition", "Exam", "Transport"
+}
+
+model Transaction {
+  id               String   @id @default(uuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id])
+  amount           Float
+  status           String   // "PENDING", "SUCCESS", "FAILED"
+  transactionDate  DateTime @default(now())
+  receiptNumber    String?
+  gatewayReference String?  // Mock bank reference ID
+}
+
+model HardwareLog {
+  id          String   @id @default(uuid())
+  rfidTag     String
+  timestamp   DateTime
+  machineId   String
+}
+
+model AttendanceRecord {
+  id          String   @id @default(uuid())
+  date        DateTime
+  status      String   // "Present", "Absent"
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  subjectId   String
+  subject     Subject  @relation(fields: [subjectId], references: [id])
+  scheduleId  String?
+  schedule    Schedule? @relation(fields: [scheduleId], references: [id])
+}
+
+model DisciplinaryRecord {
+  id          String   @id @default(uuid())
+  studentId   String
+  student     User     @relation("StudentDiscipline", fields: [studentId], references: [id])
+  facultyId   String
+  faculty     User     @relation("FacultyReporter", fields: [facultyId], references: [id])
+  date        DateTime @default(now())
+  severity    String   // "Low", "Medium", "High", "Severe"
+  description String
+  adminAction String?  // e.g., "Parent Called", "Suspended"
+  status      String   @default("PENDING") // "PENDING", "RESOLVED"
+}
+
