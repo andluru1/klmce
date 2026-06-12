@@ -12,7 +12,7 @@ export default function PaymentClient({ fee }: { fee: any }) {
     try {
       const res = await processMockPayment(fee.id, fee.userId, fee.amount);
       if (res.success) {
-        alert(`Payment Successful! Reference: ${res.reference}`);
+        alert(`Payment Successful! Reference: ${res.receiptNumber}`);
       }
     } catch (e: any) {
       alert("Payment failed: " + e.message);

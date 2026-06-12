@@ -5,8 +5,16 @@ import AdminFinanceClient from './AdminFinanceClient';
 import { IndianRupee, Users, ArrowUpRight } from 'lucide-react';
 import { GlassCard } from '@/components/ui/VibeCard';
 import AssessFeeForm from './components/AssessFeeForm';
+import PaginationControls from '@/components/ui/PaginationControls';
 
-export default async function AdminFinanceLedger() {
+export default async function AdminFinanceLedger({
+  searchParams,
+}: {
+  searchParams: { page?: string };
+}) {
+  const currentPage = Number(searchParams?.page) || 1;
+  const itemsPerPage = 10;
+  const skip = (currentPage - 1) * itemsPerPage;
   const sessionUser = await getSessionUser();
   if (!sessionUser || sessionUser.role !== 'ADMIN') {
     return <div>Access Denied</div>;
@@ -18,19 +26,33 @@ export default async function AdminFinanceLedger() {
     orderBy: { rollNumber: 'asc' }
   });
 
-  // Fetch all successful transactions
-  const transactions = await prisma.transaction.findMany({
-    where: { status: 'SUCCESS' },
-    include: {
-      user: {
-        select: { name: true, rollNumber: true, classSectionId: true }
-      }
-    },
-    orderBy: { transactionDate: 'desc' }
-  });
+  // Fetch paginated transactions and aggregate global metrics
+  const [transactions, totalTxn, grossAgg, uniqueAgg] = await Promise.all([
+    prisma.transaction.findMany({
+      where: { status: 'SUCCESS' },
+      take: itemsPerPage,
+      skip: skip,
+      include: {
+        user: {
+          select: { name: true, rollNumber: true, classSectionId: true }
+        }
+      },
+      orderBy: { transactionDate: 'desc' }
+    }),
+    prisma.transaction.count({ where: { status: 'SUCCESS' } }),
+    prisma.transaction.aggregate({
+      _sum: { amount: true },
+      where: { status: 'SUCCESS' }
+    }),
+    prisma.transaction.groupBy({
+      by: ['userId'],
+      where: { status: 'SUCCESS' }
+    })
+  ]);
 
-  const grossCollections = transactions.reduce((acc, curr) => acc + curr.amount, 0);
-  const uniqueStudents = new Set(transactions.map(t => t.userId)).size;
+  const totalPages = Math.ceil(totalTxn / itemsPerPage);
+  const grossCollections = grossAgg._sum.amount || 0;
+  const uniqueStudents = uniqueAgg.length;
 
   return (
     <div className="w-full max-w-7xl mx-auto space-y-8 pb-12 pt-8 px-8">
@@ -135,6 +157,9 @@ export default async function AdminFinanceLedger() {
               )}
             </tbody>
           </table>
+        </div>
+        <div className="mt-4 border-t border-slate-800/50 pt-4">
+          <PaginationControls totalPages={totalPages} currentPage={currentPage} />
         </div>
       </GlassCard>
       </div>

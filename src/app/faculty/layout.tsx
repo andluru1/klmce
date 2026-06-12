@@ -3,7 +3,8 @@ import Link from 'next/link';
 import { getSessionUser } from '@/lib/auth';
 import { logout } from '@/app/login/actions';
 import { redirect } from 'next/navigation';
-import { BookOpen, Users, CalendarDays, LogOut, ShieldAlert } from 'lucide-react';
+import { BookOpen, Users, CalendarDays, LogOut, ShieldAlert, FileSpreadsheet, Bell } from 'lucide-react';
+import prisma from '@/lib/prisma';
 
 export default async function FacultyLayout({ children }: { children: React.ReactNode }) {
   const sessionUser = await getSessionUser();
@@ -11,11 +12,20 @@ export default async function FacultyLayout({ children }: { children: React.Reac
     redirect('/login');
   }
 
+  const faculty = await prisma.user.findUnique({
+    where: { id: sessionUser.id },
+    select: { isHOD: true }
+  });
+
   const navLinks = [
     { href: '/faculty', label: 'Dashboard', icon: <BookOpen className="w-5 h-5" /> },
     { href: '/faculty/students', label: 'My Students', icon: <Users className="w-5 h-5" /> },
     { href: '/faculty/schedule', label: 'Schedule', icon: <CalendarDays className="w-5 h-5" /> },
+    { href: '/faculty/exams', label: 'Exam Engine', icon: <FileSpreadsheet className="w-5 h-5" /> },
+    { href: '/faculty/attendance', label: 'Attendance', icon: <FileSpreadsheet className="w-5 h-5" /> },
+    { href: '/faculty/leaves', label: 'My Leaves', icon: <CalendarDays className="w-5 h-5" /> },
     { href: '/faculty/discipline', label: 'Discipline', icon: <ShieldAlert className="w-5 h-5" /> },
+    { href: '/faculty/notifications', label: 'Inbox', icon: <Bell className="w-5 h-5" /> },
   ];
 
   return (
@@ -44,6 +54,16 @@ export default async function FacultyLayout({ children }: { children: React.Reac
                 {link.label}
               </Link>
             ))}
+          
+          {faculty?.isHOD && (
+            <Link 
+              href="/faculty/hod" 
+              className="flex items-center gap-3 px-3 py-2 rounded-lg text-emerald-300 font-bold hover:text-emerald-100 hover:bg-emerald-900/30 border border-emerald-500/20 transition-colors mt-4"
+            >
+              <Users className="w-5 h-5" />
+              <span>HOD Dashboard</span>
+            </Link>
+          )}
           </nav>
         </div>
 

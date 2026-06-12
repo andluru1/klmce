@@ -11,6 +11,8 @@ async function main() {
   await prisma.studentResult.deleteMany();
   await prisma.exam.deleteMany();
   await prisma.attendanceRecord.deleteMany();
+  await prisma.disciplinaryRecord.deleteMany();
+  await prisma.auditLog.deleteMany();
   await prisma.notification.deleteMany();
   await prisma.leaveRequest.deleteMany();
   await prisma.schedule.deleteMany();
@@ -41,13 +43,13 @@ async function main() {
 
   // 4. Faculty Users
   const faculty1 = await prisma.user.create({
-    data: { rollNumber: 'FAC-CSE-01', passwordHash, role: 'FACULTY', name: 'Dr. Alan Turing', phone: '9876543210', departmentId: deptCSE.id }
+    data: { rollNumber: 'FAC-CSE-01', passwordHash, role: 'FACULTY', name: 'Dr. V. Lokeswara Reddy', phone: '9876543210', departmentId: deptCSE.id }
   });
   const faculty2 = await prisma.user.create({
-    data: { rollNumber: 'FAC-CSE-02', passwordHash, role: 'FACULTY', name: 'Prof. Ada Lovelace', phone: '9876543211', departmentId: deptCSE.id }
+    data: { rollNumber: 'FAC-CSE-02', passwordHash, role: 'FACULTY', name: 'Prof. M.V. Narayana', phone: '9876543211', departmentId: deptCSE.id }
   });
   const faculty3 = await prisma.user.create({
-    data: { rollNumber: 'FAC-ECE-01', passwordHash, role: 'FACULTY', name: 'Dr. Claude Shannon', phone: '9876543212', departmentId: deptECE.id }
+    data: { rollNumber: 'FAC-ECE-01', passwordHash, role: 'FACULTY', name: 'Dr. G. Hemalatha', phone: '9876543212', departmentId: deptECE.id }
   });
 
   // 5. Subjects

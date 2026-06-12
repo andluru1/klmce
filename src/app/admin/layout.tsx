@@ -13,6 +13,7 @@ function AdminSidebar() {
     { name: 'Discipline', icon: ShieldAlert, href: '/admin/discipline' },
     { name: 'User Management', icon: Users, href: '/admin/users' },
     { name: 'Communications', icon: MessageSquare, href: '/admin/communications' },
+    { name: 'Security Logs', icon: ShieldAlert, href: '/admin/security' },
     { name: 'Bulk Upload', icon: FileText, href: '/admin/bulkupload' },
     { name: 'Settings', icon: Settings, href: '/admin/settings' },
   ];

@@ -2,6 +2,7 @@
 
 import prisma from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { verifySession } from '@/lib/session';
 
 export async function createExam(formData: FormData) {
   try {

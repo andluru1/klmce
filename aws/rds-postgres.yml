@@ -1,0 +1,61 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CloudFormation Template for Amazon RDS PostgreSQL for KSRM UMS'
+
+Parameters:
+  DBName:
+    Default: 'ksrmumsdb'
+    Description: 'The database name'
+    Type: String
+  DBUser:
+    Default: 'postgres'
+    Description: 'The database admin account username'
+    Type: String
+  DBPassword:
+    NoEcho: true
+    Description: 'The database admin account password (min 8 characters)'
+    Type: String
+    MinLength: '8'
+  DBInstanceClass:
+    Default: 'db.t3.micro'
+    Description: 'The database instance type (t3.micro is free-tier eligible)'
+    Type: String
+  AllocatedStorage:
+    Default: '20'
+    Description: 'The size of the database (Gb)'
+    Type: Number
+
+Resources:
+  DBSecurityGroup:
+    Type: 'AWS::RDS::DBSecurityGroup'
+    Properties:
+      GroupDescription: 'Allow public access to the PostgreSQL database for Amplify and Local connections'
+      DBSecurityGroupIngress:
+        - CIDRIP: '0.0.0.0/0' # Note: In a production enterprise scenario, restrict this to VPC/Amplify IPs
+
+  PostgreSQLDB:
+    Type: 'AWS::RDS::DBInstance'
+    Properties:
+      DBName: !Ref DBName
+      AllocatedStorage: !Ref AllocatedStorage
+      DBInstanceClass: !Ref DBInstanceClass
+      Engine: postgres
+      EngineVersion: '16.3'
+      MasterUsername: !Ref DBUser
+      MasterUserPassword: !Ref DBPassword
+      PubliclyAccessible: true
+      DBSecurityGroups:
+        - !Ref DBSecurityGroup
+      BackupRetentionPeriod: 7
+      StorageEncrypted: true
+      DeletionProtection: false # Set to true for real production to prevent accidental deletion
+
+Outputs:
+  DatabaseEndpoint:
+    Description: 'The connection endpoint for the RDS instance'
+    Value: !GetAtt PostgreSQLDB.Endpoint.Address
+  DatabasePort:
+    Description: 'The port for the RDS instance'
+    Value: !GetAtt PostgreSQLDB.Endpoint.Port
+  ConnectionURL:
+    Description: 'The Prisma DATABASE_URL to use in .env'
+    Value: !Sub 'postgresql://${DBUser}:${DBPassword}@${PostgreSQLDB.Endpoint.Address}:${PostgreSQLDB.Endpoint.Port}/${DBName}'

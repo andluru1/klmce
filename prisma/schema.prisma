@@ -21,6 +21,7 @@ model User {
   rollNumber      String   @unique // e.g., 209Y1A0501 (for admins, a custom username)
   passwordHash    String
   role            String   @default("STUDENT") // STUDENT, ADMIN, or FACULTY
+  isHOD           Boolean  @default(false)     // True if they are Head of Department
   name            String
   phone           String?  // Contact number for faculty/staff
   departmentId    String?
@@ -39,11 +40,14 @@ model User {
   announcements   Announcement[] // Announcements created by this user
   schedules       Schedule[] // Classes taught by this user (if FACULTY)
   leaves          LeaveRequest[]
+  leaveMessages   LeaveMessage[]
   notifications   Notification[]
   results         StudentResult[]
   attendance      AttendanceRecord[]
   disciplinaryRecords DisciplinaryRecord[] @relation("StudentDiscipline")
   reportedMisconducts DisciplinaryRecord[] @relation("FacultyReporter")
+  auditLogs       AuditLog[]
+  examAttempts    ExamAttempt[]
 }
 
 model Notification {
@@ -93,9 +97,20 @@ model LeaveRequest {
   startDate   DateTime
   endDate     DateTime
   reason      String
-  status      String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  status      String   @default("PENDING_HOD") // PENDING_HOD, HOD_APPROVED, APPROVED, REJECTED
+  messages    LeaveMessage[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model LeaveMessage {
+  id        String       @id @default(uuid())
+  leaveId   String
+  leave     LeaveRequest @relation(fields: [leaveId], references: [id])
+  senderId  String
+  sender    User         @relation(fields: [senderId], references: [id])
+  message   String
+  createdAt DateTime     @default(now())
 }
 
 model SystemConfig {
@@ -114,6 +129,7 @@ model Subject {
   department  Department @relation(fields: [departmentId], references: [id])
   schedules   Schedule[]
   exams       Exam[]
+  onlineExams OnlineExam[]
   attendance  AttendanceRecord[]
 }
 
@@ -232,3 +248,69 @@ model DisciplinaryRecord {
   status      String   @default("PENDING") // "PENDING", "RESOLVED"
 }
 
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  event     String   // e.g., "LOGIN_SUCCESS", "LOGIN_FAILED"
+  ipAddress String?
+  userAgent String?
+  timestamp DateTime @default(now())
+}
+
+// ----------------------------------------------------------------------
+// NEW MODELS FOR ONLINE EXAMS & PROCTORING
+// ----------------------------------------------------------------------
+
+model OnlineExam {
+  id          String   @id @default(uuid())
+  title       String
+  subjectId   String
+  subject     Subject  @relation(fields: [subjectId], references: [id])
+  type        String   // "PRACTICE", "CA", "MID_TERM"
+  durationMin Int      // Exam duration in minutes
+  isProctored Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  
+  questions   Question[]
+  attempts    ExamAttempt[]
+}
+
+model Question {
+  id           String   @id @default(uuid())
+  examId       String
+  exam         OnlineExam @relation(fields: [examId], references: [id])
+  text         String
+  marks        Int
+  options      QuestionOption[]
+}
+
+model QuestionOption {
+  id         String   @id @default(uuid())
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id])
+  text       String
+  isCorrect  Boolean
+}
+
+model ExamAttempt {
+  id             String   @id @default(uuid())
+  studentId      String
+  student        User     @relation(fields: [studentId], references: [id])
+  examId         String
+  exam           OnlineExam @relation(fields: [examId], references: [id])
+  score          Int?
+  status         String   // "IN_PROGRESS", "COMPLETED", "VIOLATED"
+  progressData   Json?    // Auto-saved answers object
+  startedAt      DateTime @default(now())
+  completedAt    DateTime?
+  proctorLogs    ProctorLog[]
+}
+
+model ProctorLog {
+  id          String   @id @default(uuid())
+  attemptId   String
+  attempt     ExamAttempt @relation(fields: [attemptId], references: [id])
+  violation   String   // "TAB_SWITCH", "CAMERA_BLOCKED", "MULTIPLE_FACES"
+  timestamp   DateTime @default(now())
+}

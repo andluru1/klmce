@@ -22,7 +22,7 @@ export async function processMockPayment(feeId: string, userId: string, amount: 
     // 4. Create the Transaction Record
     const transaction = await prisma.transaction.create({
       data: {
-        userId: session.id,
+        userId: session.userId,
         amount: amount,
         status: 'SUCCESS',
         receiptNumber: receiptNumber,
@@ -54,6 +54,63 @@ export async function processMockPayment(feeId: string, userId: string, amount: 
   } catch (error) {
     console.error('Payment Processing Failed:', error);
     return { success: false, error: 'Payment failed due to internal error.' };
+  }
+}
+
+export async function payGlobalDues(amount: number) {
+  const session = await verifySession();
+  if (!session || session.role !== 'STUDENT') {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  // Find all unpaid fees
+  const pendingFees = await prisma.fee.findMany({
+    where: { userId: session.userId, isPaid: false }
+  });
+
+  if (pendingFees.length === 0) {
+    return { success: false, error: 'No pending dues found.' };
+  }
+
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+  const receiptNumber = `RCPT-GLB-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+  const gatewayRef = `pay_glb_${Math.random().toString(36).substring(2, 14)}`;
+
+  try {
+    const transaction = await prisma.transaction.create({
+      data: {
+        userId: session.userId,
+        amount: amount,
+        status: 'SUCCESS',
+        receiptNumber,
+        gatewayReference: gatewayRef,
+      },
+    });
+
+    // Mark all as paid
+    for (const fee of pendingFees) {
+      await prisma.fee.update({
+        where: { id: fee.id },
+        data: {
+          isPaid: true,
+          paidDate: new Date(),
+          paymentMode: 'Global Gateway',
+          paymentRef: receiptNumber
+        }
+      });
+    }
+
+    revalidatePath('/student/fees');
+    revalidatePath('/student/finance');
+    revalidatePath('/admin/finance');
+
+    return { 
+      success: true, 
+      receiptNumber: transaction.receiptNumber,
+      gatewayReference: transaction.gatewayReference 
+    };
+  } catch (error) {
+    return { success: false, error: 'Payment failed.' };
   }
 }
 

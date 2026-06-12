@@ -22,7 +22,7 @@ export async function raiseMisconductRemark(formData: FormData) {
     const record = await prisma.disciplinaryRecord.create({
       data: {
         studentId,
-        facultyId: session.id,
+        facultyId: session.userId,
         severity,
         description,
         status: 'PENDING'
@@ -47,7 +47,7 @@ export async function createLeaveRequest(data: { facultyId: string, startDate: s
 
     await prisma.leaveRequest.create({
       data: {
-        facultyId: session.id,
+        facultyId: session.userId,
         startDate: new Date(data.startDate),
         endDate: new Date(data.endDate),
         reason: data.reason,

@@ -5,24 +5,36 @@ import DragDropUserCSV from './components/DragDropUserCSV';
 import { GlassCard } from '@/components/ui/VibeCard';
 import { Users, GraduationCap, Briefcase } from 'lucide-react';
 
-export default async function ManageUsersPage() {
+import { getCachedDepartments, getCachedClassSections } from '@/lib/data-cache';
+import PaginationControls from '@/components/ui/PaginationControls';
+
+export default async function ManageUsersPage({
+  searchParams,
+}: {
+  searchParams: { page?: string };
+}) {
+  const currentPage = Number(searchParams?.page) || 1;
+  const itemsPerPage = 15;
+  const skip = (currentPage - 1) * itemsPerPage;
   // Fetch users from database
-  const users = await prisma.user.findMany({
-    include: {
-      department: true,
-    },
-    orderBy: {
-      rollNumber: 'asc'
-    }
-  });
+  const [users, totalUsers] = await Promise.all([
+    prisma.user.findMany({
+      take: itemsPerPage,
+      skip: skip,
+      include: {
+        department: true,
+      },
+      orderBy: {
+        rollNumber: 'asc'
+      }
+    }),
+    prisma.user.count()
+  ]);
 
-  const departments = await prisma.department.findMany({
-    orderBy: { name: 'asc' }
-  });
+  const totalPages = Math.ceil(totalUsers / itemsPerPage);
 
-  const sections = await prisma.classSection.findMany({
-    orderBy: { name: 'asc' }
-  });
+  const departments = await getCachedDepartments();
+  const sections = await getCachedClassSections();
 
   return (
     <div className="w-full max-w-7xl mx-auto space-y-8 pb-12 pt-8 px-8">
@@ -88,6 +100,10 @@ export default async function ManageUsersPage() {
                   )}
                 </tbody>
               </table>
+            </div>
+            
+            <div className="mt-4 border-t border-slate-800/50 pt-4">
+              <PaginationControls totalPages={totalPages} currentPage={currentPage} />
             </div>
           </GlassCard>
         </div>

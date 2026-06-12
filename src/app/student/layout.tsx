@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { Home, BellRing, LogOut, BookOpen, User, Archive } from 'lucide-react';
+import { Home, BellRing, LogOut, BookOpen, User, Archive, FileSpreadsheet } from 'lucide-react';
 
 export default function StudentLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -27,6 +27,10 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
           <Link href="/student/fees" className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/50 transition-colors">
             <User className="w-5 h-5 text-emerald-400" />
             <span className="font-medium">Fee Payments</span>
+          </Link>
+          <Link href="/student/exam-center" className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/50 transition-colors">
+            <FileSpreadsheet className="w-5 h-5 text-purple-400" />
+            <span className="font-medium">Exam Center</span>
           </Link>
           <Link href="/student/notifications" className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/50 transition-colors">
             <BellRing className="w-5 h-5 text-rose-400" />

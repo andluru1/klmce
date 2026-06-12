@@ -2,12 +2,21 @@ import React from 'react';
 import prisma from '@/lib/prisma';
 import { CalendarClock } from 'lucide-react';
 import LeaveApplicationForm from './components/LeaveApplicationForm';
+import LeaveHistoryClient from './LeaveHistoryClient';
 
 export default async function FacultyLeavesPage() {
   const faculty = await prisma.user.findFirst({
     where: { role: 'FACULTY' },
     include: {
-      leaves: { orderBy: { createdAt: 'desc' } }
+      leaves: { 
+        orderBy: { createdAt: 'desc' },
+        include: {
+          messages: {
+            include: { sender: true },
+            orderBy: { createdAt: 'asc' }
+          }
+        }
+      }
     }
   });
 
@@ -32,31 +41,7 @@ export default async function FacultyLeavesPage() {
 
         <div className="space-y-4">
           <h2 className="text-xl font-bold text-white">Leave History</h2>
-          {faculty.leaves.length === 0 ? (
-            <div className="p-8 text-center border border-dashed border-slate-700 rounded-xl text-slate-500">
-              No previous leave requests found.
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {faculty.leaves.map(l => (
-                <div key={l.id} className="p-4 bg-slate-900/50 rounded-xl border border-slate-800">
-                  <div className="flex justify-between items-start mb-2">
-                    <span className="text-sm font-medium text-white">
-                      {l.startDate.toLocaleDateString()} &rarr; {l.endDate.toLocaleDateString()}
-                    </span>
-                    <span className={`px-2 py-1 text-[10px] font-bold rounded uppercase ${
-                      l.status === 'APPROVED' ? 'bg-emerald-500/20 text-emerald-400' :
-                      l.status === 'REJECTED' ? 'bg-rose-500/20 text-rose-400' :
-                      'bg-amber-500/20 text-amber-400'
-                    }`}>
-                      {l.status}
-                    </span>
-                  </div>
-                  <p className="text-sm text-slate-400">{l.reason}</p>
-                </div>
-              ))}
-            </div>
-          )}
+          <LeaveHistoryClient leaves={faculty.leaves} currentUserId={faculty.id} />
         </div>
       </div>
     </div>

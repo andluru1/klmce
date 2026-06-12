@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { GlassCard } from '@/components/ui/VibeCard';
 import { CreditCard, CheckCircle2, ShieldCheck, Loader2 } from 'lucide-react';
-import { processMockPayment } from '@/app/actions/finance';
+import { payGlobalDues } from '@/app/actions/finance';
 
 export default function FinanceClient({
   pendingDues,
@@ -21,7 +21,7 @@ export default function FinanceClient({
     setError('');
     
     // Server action triggers the simulated delay and database creation
-    const res = await processMockPayment(pendingDues);
+    const res = await payGlobalDues(pendingDues);
     
     if (res.success) {
       setSuccessData(res);
