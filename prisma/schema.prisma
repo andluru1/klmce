@@ -48,6 +48,8 @@ model User {
   reportedMisconducts DisciplinaryRecord[] @relation("FacultyReporter")
   auditLogs       AuditLog[]
   examAttempts    ExamAttempt[]
+  invigilatedExams Exam[] @relation("ExamInvigilator")
+  courseNotes     CourseNote[]
 }
 
 model Notification {
@@ -131,6 +133,7 @@ model Subject {
   exams       Exam[]
   onlineExams OnlineExam[]
   attendance  AttendanceRecord[]
+  courseNotes CourseNote[]
 }
 
 model Room {
@@ -177,17 +180,20 @@ model Schedule {
 // ----------------------------------------------------------------------
 
 model Exam {
-  id          String   @id @default(uuid())
-  subjectId   String
-  subject     Subject  @relation(fields: [subjectId], references: [id])
-  date        DateTime
-  startTime   String?
-  endTime     String?
-  roomId      String?
-  room        Room?    @relation(fields: [roomId], references: [id])
-  maxMarks    Int
-  examType    String   // "Mid-Term", "Final", "Practical"
-  results     StudentResult[]
+  id            String   @id @default(uuid())
+  subjectId     String
+  subject       Subject  @relation(fields: [subjectId], references: [id])
+  date          DateTime
+  startTime     String?
+  endTime       String?
+  roomId        String?
+  room          Room?    @relation(fields: [roomId], references: [id])
+  maxMarks      Int
+  examType      String   // "Mid-Term", "Final", "Practical"
+  mode          String   @default("Offline") // "Online", "Offline"
+  invigilatorId String?
+  invigilator   User?    @relation("ExamInvigilator", fields: [invigilatorId], references: [id])
+  results       StudentResult[]
 }
 
 model StudentResult {
@@ -198,6 +204,7 @@ model StudentResult {
   exam          Exam     @relation(fields: [examId], references: [id])
   marksObtained Int
   gradePoint    Float    // e.g., 9.5
+  status        String   @default("ATTENDED") // "ATTENDED", "ABSENT"
 }
 
 model FeeCategory {
@@ -313,4 +320,17 @@ model ProctorLog {
   attempt     ExamAttempt @relation(fields: [attemptId], references: [id])
   violation   String   // "TAB_SWITCH", "CAMERA_BLOCKED", "MULTIPLE_FACES"
   timestamp   DateTime @default(now())
+}
+
+model CourseNote {
+  id        String   @id @default(uuid())
+  studentId String
+  student   User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  subjectId String
+  subject   Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([studentId, subjectId])
 }

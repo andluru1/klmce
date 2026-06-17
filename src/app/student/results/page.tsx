@@ -4,6 +4,7 @@ import { getSessionUser } from '@/lib/auth';
 import { GlassCard } from '@/components/ui/VibeCard';
 import { GraduationCap, Award, Calendar, BookOpen, ArrowRight } from 'lucide-react';
 import { redirect } from 'next/navigation';
+import SubjectResultCard from './components/SubjectResultCard';
 
 const SEMESTER_ORDER = ["I-I", "I-II", "II-I", "II-II", "III-I", "III-II", "IV-I", "IV-II"];
 
@@ -18,7 +19,11 @@ export default async function StudentResultsPage() {
     where: { studentId: sessionUser.id },
     include: {
       exam: {
-        include: { subject: true }
+        include: { 
+          subject: true,
+          invigilator: true,
+          room: true
+        }
       }
     },
     orderBy: { exam: { date: 'asc' } }
@@ -35,20 +40,54 @@ export default async function StudentResultsPage() {
     return subjSemIndex > currentSemIndex;
   }).sort((a, b) => SEMESTER_ORDER.indexOf(a.semester) - SEMESTER_ORDER.indexOf(b.semester));
 
-  // Group results by semester
-  const groupedResults = results.reduce((acc, curr) => {
-    const sem = curr.exam.subject.semester;
-    if (!acc[sem]) acc[sem] = [];
-    acc[sem].push(curr);
-    return acc;
-  }, {} as Record<string, typeof results>);
+  // Group results by semester and then by subject
+  type SubjectGroup = {
+    subject: any;
+    results: typeof results;
+    totalMarks: number;
+    maxTotalMarks: number;
+    finalGradePoint: number;
+  };
 
-  // Calculate SGPA (Simplified: average of grade points)
-  const totalGradePoints = results.reduce((acc, curr) => acc + curr.gradePoint, 0);
-  const cgpa = results.length > 0 ? (totalGradePoints / results.length).toFixed(2) : 'N/A';
+  const groupedBySemesterAndSubject = results.reduce((acc, curr) => {
+    const sem = curr.exam.subject.semester;
+    const subjId = curr.exam.subject.id;
+    
+    if (!acc[sem]) acc[sem] = {};
+    if (!acc[sem][subjId]) acc[sem][subjId] = {
+      subject: curr.exam.subject,
+      results: [],
+      totalMarks: 0,
+      maxTotalMarks: 0,
+      finalGradePoint: 0
+    };
+    
+    const group = acc[sem][subjId];
+    group.results.push(curr);
+    group.totalMarks += curr.marksObtained;
+    group.maxTotalMarks += curr.exam.maxMarks;
+    
+    // Use the latest or 'Final' exam's grade point as the overall grade point
+    if (curr.exam.examType === 'Final' || group.finalGradePoint === 0) {
+        group.finalGradePoint = curr.gradePoint;
+    }
+
+    return acc;
+  }, {} as Record<string, Record<string, SubjectGroup>>);
+
+  // Calculate CGPA (Average of final grade points of all unique subjects taken)
+  let totalGradePoints = 0;
+  let totalSubjects = 0;
+  Object.values(groupedBySemesterAndSubject).forEach(semObj => {
+    Object.values(semObj).forEach(subjGroup => {
+        totalGradePoints += subjGroup.finalGradePoint;
+        totalSubjects += 1;
+    });
+  });
+  const cgpa = totalSubjects > 0 ? (totalGradePoints / totalSubjects).toFixed(2) : 'N/A';
 
   // Sort the grouped semesters chronologically
-  const sortedSemesters = Object.keys(groupedResults).sort((a, b) => {
+  const sortedSemesters = Object.keys(groupedBySemesterAndSubject).sort((a, b) => {
     return SEMESTER_ORDER.indexOf(a) - SEMESTER_ORDER.indexOf(b);
   });
 
@@ -81,12 +120,21 @@ export default async function StudentResultsPage() {
           </div>
         ) : (
           sortedSemesters.map((sem) => {
-            const semResults = groupedResults[sem];
-            const semSgpa = (semResults.reduce((sum, r) => sum + r.gradePoint, 0) / semResults.length).toFixed(2);
+            const subjectsObj = groupedBySemesterAndSubject[sem];
+            const subjectsList = Object.values(subjectsObj);
+            
+            // Calculate semester total marks
+            const semTotalMarks = subjectsList.reduce((sum, s) => sum + s.totalMarks, 0);
+            const semMaxMarks = subjectsList.reduce((sum, s) => sum + s.maxTotalMarks, 0);
+            
+            // Calculate SGPA properly: average of finalGradePoints
+            const semSgpa = subjectsList.length > 0 
+                ? (subjectsList.reduce((sum, s) => sum + s.finalGradePoint, 0) / subjectsList.length).toFixed(2) 
+                : '0.00';
             
             return (
               <div key={sem} className="bg-slate-900/50 rounded-3xl p-6 border border-slate-800/50 space-y-6">
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                   <div className="flex items-center gap-3">
                     <span className="px-4 py-1.5 bg-slate-800 text-slate-300 font-bold rounded-lg tracking-widest text-sm">
                       SEMESTER {sem}
@@ -97,42 +145,21 @@ export default async function StudentResultsPage() {
                       </span>
                     )}
                   </div>
-                  <div className="text-right">
-                    <span className="text-slate-400 text-sm mr-2">SGPA:</span>
-                    <span className="text-xl font-bold text-white">{semSgpa}</span>
+                  <div className="flex items-center gap-6 border-t sm:border-t-0 border-slate-800/50 pt-4 sm:pt-0">
+                    <div className="text-right">
+                        <span className="text-slate-400 text-sm mr-2">Total Marks:</span>
+                        <span className="text-md font-bold text-emerald-400">{semTotalMarks} <span className="text-slate-600 text-xs">/ {semMaxMarks}</span></span>
+                    </div>
+                    <div className="text-right">
+                        <span className="text-slate-400 text-sm mr-2">SGPA:</span>
+                        <span className="text-xl font-bold text-white">{semSgpa}</span>
+                    </div>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {semResults.map((res) => (
-                    <GlassCard key={res.id} className="p-5 bg-slate-950 border-slate-800 relative overflow-hidden hover:border-indigo-500/30 transition-all">
-                      <div className="flex justify-between items-start mb-3">
-                        <div className="space-y-1">
-                          <h3 className="text-md font-bold text-white leading-tight">{res.exam.subject.name}</h3>
-                          <p className="text-xs text-slate-500 font-mono">{res.exam.subject.code} • {res.exam.subject.credits} Credits</p>
-                        </div>
-                        <div className="text-right">
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center border ${
-                            res.gradePoint >= 8 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' :
-                            res.gradePoint >= 6 ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' :
-                            'bg-rose-500/10 border-rose-500/30 text-rose-400'
-                          }`}>
-                            <span className="font-bold text-sm">{res.gradePoint}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="pt-3 mt-3 border-t border-slate-800/50 flex justify-between items-center text-xs">
-                        <div className="flex items-center gap-1.5 text-slate-400">
-                          <Award className="w-3.5 h-3.5 text-indigo-400" />
-                          <span className="text-white font-medium">{res.marksObtained} <span className="text-slate-500">/ {res.exam.maxMarks}</span></span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-slate-500">
-                          <Calendar className="w-3.5 h-3.5" />
-                          <span>{new Date(res.exam.date).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}</span>
-                        </div>
-                      </div>
-                    </GlassCard>
+                  {subjectsList.map((subjGroup) => (
+                    <SubjectResultCard key={subjGroup.subject.id} subjGroup={subjGroup} />
                   ))}
                 </div>
               </div>

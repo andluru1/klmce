@@ -30,6 +30,18 @@ export default function ExamClient({
     answersRef.current = answers;
   }, [answers]);
 
+  const handleForceSubmit = async () => {
+    setSubmitting(true);
+    await submitExam(attemptId, answersRef.current);
+    router.push('/student/exam-center');
+  };
+
+  const handleSubmit = async () => {
+    if (confirm('Are you sure you want to submit your exam?')) {
+      handleForceSubmit();
+    }
+  };
+
   useEffect(() => {
     // Timer
     const timer = setInterval(() => {
@@ -44,7 +56,7 @@ export default function ExamClient({
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [attemptId, router]);
 
   useEffect(() => {
     // Auto-save loop every 30 seconds
@@ -86,17 +98,7 @@ export default function ExamClient({
     }
   };
 
-  const handleForceSubmit = async () => {
-    setSubmitting(true);
-    await submitExam(attemptId, answers);
-    router.push('/student/exam-center');
-  };
 
-  const handleSubmit = async () => {
-    if (confirm('Are you sure you want to submit your exam?')) {
-      handleForceSubmit();
-    }
-  };
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);

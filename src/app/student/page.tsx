@@ -62,9 +62,19 @@ export default async function StudentDashboard() {
     orderBy: { exam: { date: 'desc' } }
   });
 
-  // Calculate current SGPA for the top card (Average of all grade points)
-  const totalGradePoints = allResults.reduce((acc, curr) => acc + curr.gradePoint, 0);
-  const cgpa = allResults.length > 0 ? (totalGradePoints / allResults.length).toFixed(2) : 'N/A';
+  // Calculate current SGPA for the top card (Average of all final grade points per unique subject)
+  const finalResultsMap = new Map();
+  allResults.forEach(res => {
+    // Only consider the most recent Final exam for each subject
+    if (res.exam.examType === 'Final') {
+      if (!finalResultsMap.has(res.exam.subjectId)) {
+        finalResultsMap.set(res.exam.subjectId, res.gradePoint);
+      }
+    }
+  });
+  let totalGradePoints = 0;
+  finalResultsMap.forEach(gp => totalGradePoints += gp);
+  const cgpa = finalResultsMap.size > 0 ? (totalGradePoints / finalResultsMap.size).toFixed(2) : 'N/A';
 
   // 5. Fetch Upcoming Exams (Scheduled but not yet taken)
   const upcomingExams = await prisma.exam.findMany({
@@ -72,7 +82,7 @@ export default async function StudentDashboard() {
       subject: { departmentId: student.departmentId! },
       date: { gte: new Date() }
     },
-    include: { subject: true, room: true },
+    include: { subject: true, room: true, invigilator: true },
     orderBy: { date: 'asc' }
   });
 
@@ -190,14 +200,26 @@ export default async function StudentDashboard() {
                       <h4 className="text-white font-bold text-lg leading-tight">{exam.subject.name}</h4>
                     </div>
                     
-                    <div className="flex flex-col items-end gap-1.5 min-w-[140px]">
+                    <div className="flex flex-col items-end gap-1.5 min-w-[160px]">
                       <div className="flex items-center gap-1.5 text-slate-300 text-sm font-medium">
                         <Clock className="w-4 h-4 text-amber-400" />
                         {new Date(exam.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} • {exam.startTime}
                       </div>
-                      <div className="flex items-center gap-1.5 text-slate-400 text-xs">
-                        <MapPin className="w-3.5 h-3.5 text-rose-400" />
-                        {exam.room ? `Room ${exam.room.number}` : 'TBA'}
+                      <div className="flex items-center justify-end gap-3 text-slate-400 text-xs mt-1 w-full">
+                        <div className="flex items-center gap-1">
+                          <MapPin className="w-3.5 h-3.5 text-rose-400" />
+                          {exam.room ? `Room ${exam.room.number}` : 'TBA'}
+                        </div>
+                        {exam.invigilator && (
+                          <div className="flex items-center gap-1 text-slate-500">
+                            • {exam.invigilator.name}
+                          </div>
+                        )}
+                        {exam.mode && (
+                          <div className="flex items-center gap-1 text-slate-500">
+                            • {exam.mode}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -208,7 +230,7 @@ export default async function StudentDashboard() {
 
           {/* Today's Timetable Widget */}
           <div>
-            <h2 className="text-xl font-bold text-white mb-4">Today's Classes</h2>
+            <h2 className="text-xl font-bold text-white mb-4">Today&apos;s Classes</h2>
             <div className="bg-slate-900/40 border border-slate-800 rounded-2xl overflow-hidden p-2 space-y-2">
               {todaysSchedule.length === 0 ? (
                 <div className="p-8 text-center">
@@ -305,7 +327,7 @@ export default async function StudentDashboard() {
                     {record.severity} Severity
                   </span>
                 </div>
-                <p className="text-slate-300 text-sm ml-2 mt-2 leading-relaxed">"{record.description}"</p>
+                <p className="text-slate-300 text-sm ml-2 mt-2 leading-relaxed">&quot;{record.description}&quot;</p>
                 {record.adminAction && (
                   <div className="mt-3 ml-2 p-2.5 bg-slate-800/50 rounded-lg border border-slate-700 flex items-start gap-2">
                     <Scale className="w-4 h-4 text-indigo-400 mt-0.5 shrink-0" />

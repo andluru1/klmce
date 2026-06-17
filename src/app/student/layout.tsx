@@ -1,11 +1,11 @@
 import React from 'react';
 import Link from 'next/link';
-import { Home, BellRing, LogOut, BookOpen, User, Archive, FileSpreadsheet } from 'lucide-react';
+import { Home, BellRing, LogOut, BookOpen, User, Archive, FileSpreadsheet, CalendarDays } from 'lucide-react';
 
 export default function StudentLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex h-screen bg-slate-950">
-      <aside className="w-64 border-r border-slate-800 bg-slate-950 flex flex-col h-full sticky top-0 shrink-0">
+    <div className="flex h-screen bg-transparent">
+      <aside className="w-64 border-r border-slate-800 bg-transparent flex flex-col h-full sticky top-0 shrink-0">
         <div className="p-6">
           <Link href="/student" className="flex items-center gap-3 group">
             <div className="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/20 group-hover:shadow-blue-500/40 transition-all">
@@ -20,8 +20,12 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
             <Home className="w-5 h-5 text-blue-400" />
             <span className="font-medium">Dashboard</span>
           </Link>
-          <Link href="/student/timetable" className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/50 transition-colors">
+          <Link href="/student/courses" className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/50 transition-colors">
             <BookOpen className="w-5 h-5 text-indigo-400" />
+            <span className="font-medium">My Courses</span>
+          </Link>
+          <Link href="/student/timetable" className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/50 transition-colors">
+            <CalendarDays className="w-5 h-5 text-indigo-400" />
             <span className="font-medium">My Timetable</span>
           </Link>
           <Link href="/student/fees" className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/50 transition-colors">
@@ -50,7 +54,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
         </div>
       </aside>
 
-      <main className="flex-1 overflow-y-auto bg-slate-950">
+      <main className="flex-1 overflow-y-auto bg-transparent relative z-10">
         {children}
       </main>
     </div>

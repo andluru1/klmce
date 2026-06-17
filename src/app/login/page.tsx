@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { GlassCard } from '@/components/ui/VibeCard';
 import { loginWithCredentials } from './actions';
 import { Lock, User, AlertCircle, Loader2 } from 'lucide-react';
@@ -37,8 +38,15 @@ export default function LoginPage() {
 
       <GlassCard className="w-full max-w-md p-8 bg-slate-900/80 border-slate-800 z-10 relative shadow-2xl">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 mx-auto bg-gradient-to-tr from-indigo-500 to-rose-500 rounded-2xl flex items-center justify-center text-white font-bold text-3xl mb-4 shadow-xl">
-            K
+          <div className="w-24 h-24 mx-auto bg-white rounded-full p-2 flex items-center justify-center mb-4 shadow-xl border-4 border-indigo-500/20">
+            <div className="relative w-full h-full">
+              <Image 
+                src="/ksrm-logo.png" 
+                alt="KSRM Logo" 
+                fill
+                className="object-contain"
+              />
+            </div>
           </div>
           <h1 className="text-2xl font-bold text-white mb-2">Welcome Back</h1>
           <p className="text-slate-400">Sign in to your KSRM account.</p>
