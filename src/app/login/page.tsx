@@ -41,7 +41,7 @@ export default function LoginPage() {
           <div className="w-24 h-24 mx-auto bg-white rounded-full p-2 flex items-center justify-center mb-4 shadow-xl border-4 border-indigo-500/20">
             <div className="relative w-full h-full">
               <Image 
-                src="/KLMCE-logo.png" 
+                src="/klmce-logo.png" 
                 alt="KLMCE Logo" 
                 fill
                 className="object-contain"

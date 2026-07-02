@@ -85,7 +85,7 @@ export function TopNav() {
           <Link href="/" className="flex items-center gap-3">
             <div className="relative w-10 h-10 md:w-12 md:h-12 bg-white rounded-full p-1 shadow-md flex-shrink-0">
               <Image 
-                src="/KLMCE-logo.png" 
+                src="/klmce-logo.png" 
                 alt="KLMCE Logo" 
                 fill
                 className="object-contain p-1"
