@@ -30,7 +30,7 @@ export function Sidebar() {
           K
         </div>
         <h2 className="text-2xl font-bold tracking-tight text-white drop-shadow-md">
-          KSRMMS
+          KLMCEMS
         </h2>
       </div>
 

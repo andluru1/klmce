@@ -80,7 +80,7 @@ async function main() {
   const r101 = await prisma.room.create({ data: { number: '101', capacity: 60, type: 'Classroom' } });
 
   // 7. Synthetic Students
-  const firstNames = ['Arjun', 'Priya', 'Rahul', 'Sneha', 'Karthik', 'Ananya'];
+  const firstNames = ['Priya', 'Sneha', 'Ananya', 'Kavya', 'Neha', 'Pooja'];
   const lastNames = ['Reddy', 'Sharma', 'Patel', 'Rao', 'Kumar', 'Singh'];
 
   const students = [];
@@ -92,7 +92,7 @@ async function main() {
       const code = rollIdx.toString().padStart(2, '0');
       const rollNum = `209Y1A05${code}`;
 
-      // Arjun Reddy is the "Demo User"
+      // Priya Reddy is the "Demo User"
       const isDemoUser = rollNum === '209Y1A0501';
 
       const student = await prisma.user.create({
@@ -114,7 +114,7 @@ async function main() {
     }
   }
 
-  const demoUser = students[0]; // Arjun Reddy
+  const demoUser = students[0]; // Priya Reddy
 
   // 8. Financial Transactions (Ledger Data)
   for (const s of students) {
@@ -330,7 +330,7 @@ async function main() {
   });
 
   console.log('🎉 Database seeding complete!');
-  console.log(`Successfully generated hyper-realistic demo persona for Arjun Reddy (209Y1A0501) as a FINAL YEAR STUDENT with a full 4-year transcript, backlogs, CA/Mid marks, and financial holds!`);
+  console.log(`Successfully generated hyper-realistic demo persona for Priya Reddy (209Y1A0501) as a FINAL YEAR STUDENT with a full 4-year transcript, backlogs, CA/Mid marks, and financial holds!`);
 }
 
 main()

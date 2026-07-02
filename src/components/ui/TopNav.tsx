@@ -3,10 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { Bell, Search, User, ChevronDown, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export function TopNav() {
+  const pathname = usePathname();
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
@@ -39,17 +41,21 @@ export function TopNav() {
     {
       name: 'About',
       links: [
-        { label: 'About KSRMCE', href: 'https://ksrmce.ac.in/college.php' },
-        { label: 'Correspondent', href: 'https://ksrmce.ac.in/Correspondent%20Maam.php' },
-        { label: 'Managing Director', href: 'https://ksrmce.ac.in/director.php' },
-        { label: 'Chairman', href: 'https://ksrmce.ac.in/vice%20chairman%20sir.php' },
-        { label: 'Principal', href: 'https://ksrmce.ac.in/principal.php' },
+        { label: 'About KLMCE', href: 'https://KLMCE.ac.in/college.php' },
+        { label: 'Correspondent', href: 'https://KLMCE.ac.in/Correspondent%20Maam.php' },
+        { label: 'Managing Director', href: 'https://KLMCE.ac.in/director.php' },
+        { label: 'Chairman', href: 'https://KLMCE.ac.in/vice%20chairman%20sir.php' },
+        { label: 'Principal', href: 'https://KLMCE.ac.in/principal.php' },
       ],
     },
     { name: 'Departments', links: [] },
     { name: 'Academics', links: [] },
     { name: 'Student Services', links: [] },
   ];
+
+  if (pathname === '/login') {
+    return null;
+  }
 
   return (
     <>
@@ -79,14 +85,15 @@ export function TopNav() {
           <Link href="/" className="flex items-center gap-3">
             <div className="relative w-10 h-10 md:w-12 md:h-12 bg-white rounded-full p-1 shadow-md flex-shrink-0">
               <Image 
-                src="/ksrm-logo.png" 
-                alt="KSRM Logo" 
+                src="/KLMCE-logo.png" 
+                alt="KLMCE Logo" 
                 fill
                 className="object-contain p-1"
+                unoptimized
               />
             </div>
             <div className="hidden sm:block flex-col">
-              <h1 className="text-white font-bold text-sm md:text-base leading-tight tracking-wide">KSRMCE</h1>
+              <h1 className="text-white font-bold text-sm md:text-base leading-tight tracking-wide">KLMCE</h1>
               <p className="text-white/60 text-[10px] md:text-xs leading-none">Kadapa</p>
             </div>
           </Link>

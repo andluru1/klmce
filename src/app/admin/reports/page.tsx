@@ -27,7 +27,7 @@ export default async function NAACReportsPage() {
 
       {/* Print Header */}
       <div className="hidden print:block text-center mb-8 border-b-2 border-black pb-4">
-        <h1 className="text-3xl font-black text-black">KSRM College of Engineering</h1>
+        <h1 className="text-3xl font-black text-black">KLMCE College of Engineering</h1>
         <h2 className="text-xl font-bold text-black mt-2">NAAC / NBA Accreditation Summary Report</h2>
         <p className="text-sm text-gray-600 mt-1">Generated on: {new Date().toLocaleDateString()}</p>
       </div>

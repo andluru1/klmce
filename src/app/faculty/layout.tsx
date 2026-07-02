@@ -37,7 +37,7 @@ export default async function FacultyLayout({ children }: { children: React.Reac
             <div className="w-8 h-8 rounded bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white">
               F
             </div>
-            <span className="font-bold text-lg text-white tracking-tight">KSRM Faculty</span>
+            <span className="font-bold text-lg text-white tracking-tight">KLMCE Faculty</span>
           </div>
         </div>
 
@@ -90,7 +90,7 @@ export default async function FacultyLayout({ children }: { children: React.Reac
       {/* Main Content */}
       <main className="flex-1 flex flex-col h-screen overflow-hidden bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.15),rgba(255,255,255,0))]">
         <header className="h-16 flex items-center justify-between px-8 border-b border-slate-800/50 bg-slate-950/50 backdrop-blur-md md:hidden">
-          <span className="font-bold text-lg text-white">KSRM Faculty</span>
+          <span className="font-bold text-lg text-white">KLMCE Faculty</span>
         </header>
         
         <div className="flex-1 overflow-y-auto">

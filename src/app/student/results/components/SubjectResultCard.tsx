@@ -181,7 +181,7 @@ export default function SubjectResultCard({ subjGroup }: SubjectResultCardProps)
                       <h5 className="text-xs font-bold text-rose-800 uppercase mb-2">Whom to Contact</h5>
                       <ul className="text-sm text-rose-950 space-y-1.5 list-disc list-inside">
                         <li>Prof. Ramesh (HOD, CS Dept)</li>
-                        <li>Exam Cell: <a href="mailto:examcell@ksrm.edu" className="text-indigo-800 font-bold hover:text-indigo-600">examcell@ksrm.edu</a></li>
+                        <li>Exam Cell: <a href="mailto:examcell@KLMCE.edu" className="text-indigo-800 font-bold hover:text-indigo-600">examcell@KLMCE.edu</a></li>
                       </ul>
                     </div>
                   </div>

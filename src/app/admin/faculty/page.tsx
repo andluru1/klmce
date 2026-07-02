@@ -63,7 +63,7 @@ export default async function FacultyDirectoryPage() {
                       </div>
                       <div className="flex items-center gap-2 text-sm text-slate-300">
                         <Mail className="w-4 h-4 text-slate-500" />
-                        <span className="text-xs">{faculty.rollNumber.toLowerCase()}@ksrmce.ac.in</span>
+                        <span className="text-xs">{faculty.rollNumber.toLowerCase()}@KLMCE.ac.in</span>
                       </div>
                     </div>
 

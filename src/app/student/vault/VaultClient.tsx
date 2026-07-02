@@ -76,7 +76,7 @@ export default function VaultClient({ studentName, rollNumber, departmentName, s
               <QrCode className="w-32 h-32 text-white mb-4 opacity-80" />
               <p className="text-sm text-slate-400">Scan for verification</p>
               <div className="mt-6 border-t border-slate-800 pt-4 w-full text-xs text-slate-500">
-                Property of KSRM College of Engineering
+                Property of KLMCE College of Engineering
               </div>
             </GlassCard>
           </div>

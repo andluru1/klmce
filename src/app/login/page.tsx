@@ -41,15 +41,16 @@ export default function LoginPage() {
           <div className="w-24 h-24 mx-auto bg-white rounded-full p-2 flex items-center justify-center mb-4 shadow-xl border-4 border-indigo-500/20">
             <div className="relative w-full h-full">
               <Image 
-                src="/ksrm-logo.png" 
-                alt="KSRM Logo" 
+                src="/KLMCE-logo.png" 
+                alt="KLMCE Logo" 
                 fill
                 className="object-contain"
+                unoptimized
               />
             </div>
           </div>
           <h1 className="text-2xl font-bold text-white mb-2">Welcome Back</h1>
-          <p className="text-slate-400">Sign in to your KSRM account.</p>
+          <p className="text-slate-400">Sign in to your KLMCE account.</p>
         </div>
 
         {error && (

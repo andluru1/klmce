@@ -37,7 +37,7 @@ export async function loginWithCredentials(formData: FormData) {
       data: { otpSecret: otp }
     });
 
-    console.log(`[MOCK SMS] KSRM OTP for ${user.rollNumber} is: ${otp}`);
+    console.log(`[MOCK SMS] KLMCE OTP for ${user.rollNumber} is: ${otp}`);
     
     // Return flag requiring 2FA so client can redirect
     return { require2FA: true, rollNumber: user.rollNumber };

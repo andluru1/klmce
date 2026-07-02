@@ -1,7 +1,7 @@
-# KSRM University Management System (UMS) - Project Summary
+# KLMCE University Management System (UMS) - Project Summary
 
 ## Overview
-We set out to build a modern, high-performance, and perfectly synchronized University Management System (UMS) tailored for KSRM College of Engineering. The objective was to replace outdated, fragmented portals with a unified, visually stunning, and end-to-end connected platform for Admins, Faculty, and Students.
+We set out to build a modern, high-performance, and perfectly synchronized University Management System (UMS) tailored for KLMCE College of Engineering. The objective was to replace outdated, fragmented portals with a unified, visually stunning, and end-to-end connected platform for Admins, Faculty, and Students.
 
 ## Technology Stack
 - **Framework:** Next.js 16.2.7 (App Router, Turbopack)

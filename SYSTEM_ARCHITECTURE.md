@@ -1,7 +1,7 @@
-# KSRM University Management System - Architecture & Technical Documentation
+# KLMCE University Management System - Architecture & Technical Documentation
 
 ## 1. System Overview
-The KSRM University Management System (UMS) is an enterprise-grade, fully relational web application designed to centralize administration, academic scheduling, examination processing, fee ledgers, and attendance tracking into a single synchronized platform. 
+The KLMCE University Management System (UMS) is an enterprise-grade, fully relational web application designed to centralize administration, academic scheduling, examination processing, fee ledgers, and attendance tracking into a single synchronized platform. 
 
 The system operates across three perfectly synced dashboards:
 - **Admin Portal**: For overriding management, scheduling, creating users, and generating compliance reports.

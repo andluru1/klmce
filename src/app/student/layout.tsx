@@ -11,7 +11,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
             <div className="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/20 group-hover:shadow-blue-500/40 transition-all">
               S
             </div>
-            <span className="text-xl font-bold text-white tracking-tight">KSRM Student</span>
+            <span className="text-xl font-bold text-white tracking-tight">KLMCE Student</span>
           </Link>
         </div>
 

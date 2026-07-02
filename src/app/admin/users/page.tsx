@@ -40,7 +40,7 @@ export default async function ManageUsersPage({
     <div className="w-full max-w-7xl mx-auto space-y-8 pb-12 pt-8 px-8">
       <div>
         <h1 className="text-3xl font-bold text-white mb-2">User Management</h1>
-        <p className="text-slate-400">View and manage all students and admins in KSRMMS.</p>
+        <p className="text-slate-400">View and manage all students and admins in KLMCEMS.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

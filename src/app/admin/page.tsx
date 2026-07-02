@@ -6,7 +6,7 @@ import AnnouncementForm from './components/AnnouncementForm';
 import Link from 'next/link';
 
 export default async function AdminDashboard() {
-  // Hardcode admin logic since KSRMMS doesn't have login yet
+  // Hardcode admin logic since KLMCEMS doesn't have login yet
   const adminId = 'admin-id-placeholder';
 
   // Fetch real stats
@@ -36,7 +36,7 @@ export default async function AdminDashboard() {
     <div className="w-full max-w-7xl mx-auto space-y-8 pb-12 pt-8 px-8">
       <div>
         <h1 className="text-3xl font-bold text-white mb-2">Admin Control Panel</h1>
-        <p className="text-slate-400">Manage KSRMMS students, fees, and announcements.</p>
+        <p className="text-slate-400">Manage KLMCEMS students, fees, and announcements.</p>
       </div>
 
       {/* Enterprise Modules */}

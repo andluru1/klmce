@@ -14,7 +14,7 @@ export async function createSession(userId: string, role: string) {
     .sign(encodedKey);
 
   const cookieStore = await cookies();
-  cookieStore.set('ksrm_session', session, {
+  cookieStore.set('KLMCE_session', session, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     expires: expiresAt,
@@ -25,7 +25,7 @@ export async function createSession(userId: string, role: string) {
 
 export async function verifySession() {
   const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get('ksrm_session')?.value;
+  const sessionCookie = cookieStore.get('KLMCE_session')?.value;
 
   if (!sessionCookie) return null;
 
@@ -42,5 +42,5 @@ export async function verifySession() {
 
 export async function deleteSession() {
   const cookieStore = await cookies();
-  cookieStore.delete('ksrm_session');
+  cookieStore.delete('KLMCE_session');
 }
